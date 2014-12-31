@@ -160,7 +160,9 @@ public class GitFS extends FSFS {
                     String name = treeWalk.getNameString();
                     FSEntry entry = new FSEntry();
                     entry.setName(name);
-                    map.put(name, entry);
+                    FSID id = FSID.createRevId(treeWalk.getObjectId(0).getName(), null, revNode.getCreatedRevision(), -1); // FIXME
+                    entry.setId(id);
+                    map.put(name, entry); // 여기서 entry에 정보가 부족하면 나중에 NPE를 만나게 된다.
                 }
             } catch (IOException e) {
                 SVNDebugLog.getDefaultLog().logError(SVNLogType.DEFAULT, e.getMessage());

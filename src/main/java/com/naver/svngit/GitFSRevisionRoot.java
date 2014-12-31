@@ -14,6 +14,7 @@ import org.tmatesoft.svn.core.internal.delta.SVNDeltaCombiner;
 import org.tmatesoft.svn.core.internal.io.fs.*;
 import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
 import org.tmatesoft.svn.core.internal.util.SVNPathUtil;
+import org.tmatesoft.svn.core.internal.wc.SVNErrorManager;
 import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
 
@@ -59,17 +60,22 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "tree: " + tree);
             TreeWalk treeWalk = TreeWalk.forPath(repository, path, tree);
             node.setCreatedPath(path);
-            if (treeWalk.isSubtree()) {
+            if (treeWalk == null) {
+                throw new SVNException(FSErrors.errorNotFound(this, path));
+            } else if (treeWalk.isSubtree()) {
                 node.setType(SVNNodeKind.DIR);
+                treeWalk.release();
             } else {
                 node.setType(SVNNodeKind.FILE);
+                treeWalk.release();
             }
             FSRepresentation rep = new FSRepresentation();
             rep.setRevision(getRevision());
             node.setTextRepresentation(rep);
+            FSID id = FSID.createRevId(null, null, node.getCreatedRevision(), -1); // FIXME
+            node.setId(id);
             // TODO: textRep.setMD5HexDigest();
             // TODO: node.setTextRepresentation(textRep);
-            treeWalk.release();
             return node;
         } catch (IOException e) {
             node.setType(SVNNodeKind.NONE);
@@ -79,12 +85,7 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
 
     @Override
     public InputStream getFileStreamForPath(SVNDeltaCombiner combiner, String path) throws SVNException {
-        /*
-        FSRevisionNode fileNode = getRevisionNode(path);
-        return GitFSInputStream.createDeltaStream(combiner, fileNode, getOwner());
-        */
-        // combiner 따위 무시하고 그냥 input stream을 돌려주면 어떻게 될까?
-        FSRevisionNode fileNode = getRevisionNode(path);
+        // TODO: combiner 따위 무시하고 그냥 input stream을 돌려주고 있다. 괜찮나?
         Repository repository = ((GitFS)getOwner()).getGitRepository();
         try {
             path = DAVPathUtil.dropLeadingSlash(path);
