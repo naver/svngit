@@ -1,7 +1,8 @@
-package com.naver.svngit;
+package org.tmatesoft.svn.core.internal.io.fs;
 
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.internal.io.fs.SVNGitRepository;
 import org.tmatesoft.svn.core.io.ISVNSession;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;

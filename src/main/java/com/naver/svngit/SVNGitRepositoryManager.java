@@ -25,6 +25,7 @@ import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
 import org.tmatesoft.svn.core.auth.SVNUserNameAuthentication;
+import org.tmatesoft.svn.core.internal.io.fs.SVNGitRepositoryFactory;
 import org.tmatesoft.svn.core.internal.server.dav.*;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.DAVHandlerFactory;
 import org.tmatesoft.svn.core.internal.util.SVNEncodingUtil;

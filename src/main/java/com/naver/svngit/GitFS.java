@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -250,11 +251,17 @@ public class GitFS extends FSFS {
     public SVNProperties getRevisionProperties(long revision) throws SVNException {
         SVNProperties properties = new SVNProperties();
         try {
-            RevCommit commit = SVNGitUtil.getCommitFromRevision(myGitRepository, revision);
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getRevisionProperties - revision: " + revision);
-            properties.put("svn:log", commit.getFullMessage());
-            properties.put("svn:author", commit.getAuthorIdent().getName());
-            properties.put("svn:date", SVNDate.formatDate(commit.getAuthorIdent().getWhen()));
+            if (revision == 0) {
+                // Git does not know the date at which this repository is created.
+                properties.put("svn:date", SVNDate.formatDate(new Date(0)));
+            } else {
+                RevCommit commit = SVNGitUtil.getCommitFromRevision(myGitRepository, revision);
+                SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getRevisionProperties - commit: " + commit);
+                properties.put("svn:log", commit.getFullMessage());
+                properties.put("svn:author", commit.getAuthorIdent().getName());
+                properties.put("svn:date", SVNDate.formatDate(commit.getAuthorIdent().getWhen()));
+            }
         } catch (IOException e) {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get properties from a commit"), e);
         }
