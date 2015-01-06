@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package org.tmatesoft.svn.core.internal.io.fs; // 오직 myLocationsFinder.reset(getFSFS()); 를 호출하기 위해 이 패키지로 옮김
 
 import com.naver.svngit.GitFS;
@@ -56,7 +61,7 @@ public class SVNGitRepository extends FSRepository {
     }
 
     private void openRepositoryRoot() throws SVNException {
-        // FIXME: Do we need to lock?
+        // FIXME: Need to lock?
         // lock();
 
         String hostName = getLocation().getHost();
@@ -82,13 +87,6 @@ public class SVNGitRepository extends FSRepository {
                                              new File(dirPath).getAbsoluteFile();
         myGitFS = new GitFS(myReposRootDir);
         myGitFS.open();
-        // 필요없어보여서 주석처리. TODO: 정말 필요없는지 확인할 것
-        /*
-        myFSFS.setHooksEnabled(isHooksEnabled());
-        myFSFS.open();
-        setRepositoryCredentials(myGitFS.getUUID(), getLocation().setPath(rootPath, false));
-        */
-        // setRepositoryCredentials(myGitFS.getUUID(), getLocation().setPath(rootPath, false)); 에서 myRepositoryRoot를 설정하는데 그건 필요한 것 같다.
         myRepositoryRoot = getLocation().setPath(rootPath, false);
     }
 
@@ -99,14 +97,6 @@ public class SVNGitRepository extends FSRepository {
 
     void closeRepository() throws SVNException {
         myGitFS.close();
-        // TODO: 필요없어보여서 주석처리
-        // Git은 저장소 전체를 lock 하거나 하지 않는다.
-        /*
-        if (myFSFS != null) {
-            myFSFS.close();
-        }
-        unlock();
-        */
     }
 
     public void testConnection() throws SVNException {

@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package com.naver.svngit;
 
 import org.eclipse.jgit.api.Git;
@@ -20,9 +25,6 @@ import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.IOException;
 
-/**
- * Created by nori on 14. 12. 29.
- */
 public class GitFSRevisionNode extends FSRevisionNode {
     private Repository myGitRepository;
 
@@ -33,7 +35,7 @@ public class GitFSRevisionNode extends FSRevisionNode {
     public long getCreatedRevision() {
         String path = getCreatedPath();
         try {
-            long revision = getTextRepresentation().getRevision(); // FIXME: NPE를 고쳐야 한다.
+            long revision = getTextRepresentation().getRevision(); // FIXME: Fix NPE
             ObjectId commitId = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revision);
             LogCommand logCommand = new Git(myGitRepository).log().add(commitId);
             if (path != null && !path.isEmpty()) {
@@ -47,10 +49,8 @@ public class GitFSRevisionNode extends FSRevisionNode {
             Ref target = ref.getTarget();
             return SVNGitUtil.getRevisionFromRefName(target.getName());
         } catch (Exception e) {
-            e.printStackTrace(); // FIXME: stack trace를 출력할 다른 방법을 모름
+            throw new RuntimeException("Failed to get the created revision", e);
         }
-
-        return -1; // FIXME: is this correct?
     }
 
     // public String getFileMD5Checksum() throws SVNException

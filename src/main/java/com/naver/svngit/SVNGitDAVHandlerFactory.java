@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package com.naver.svngit;
 
 import org.tmatesoft.svn.core.SVNException;

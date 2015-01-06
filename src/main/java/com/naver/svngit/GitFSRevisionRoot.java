@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package com.naver.svngit;
 
 import org.eclipse.jgit.lib.Ref;
@@ -41,16 +46,8 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
         if (path.isEmpty()) {
             node.setCreatedPath(path);
             node.setType(SVNNodeKind.DIR);
-            // TODO: 여기서 디렉토리 정보 읽어오는 작업도 수행해야한다. svnkit에서는 여기서 호출하는 openPath가 그걸 함
-            // 그 정보를 FSRevisionNode.setTextRepresentation 로 revsiionNode에 집어넣을 것
-            // TODO: node.setTextRepresentation();
             FSRepresentation rep = new FSRepresentation();
             rep.setRevision(getRevision());
-            // TODO: textRep.setMD5HexDigest();
-            // textRep.setTxnId(myTxnID);
-            // String uniqueSuffix = getNewTxnNodeId();
-            // String uniquifier = myTxnID + '/' + uniqueSuffix;
-            // textRep.setUniquifier(uniquifier);
             node.setTextRepresentation(rep);
             FSID id = FSID.createRevId(null, null, node.getCreatedRevision(), -1); // FIXME
             node.setId(id);
@@ -88,7 +85,6 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
 
     @Override
     public InputStream getFileStreamForPath(SVNDeltaCombiner combiner, String path) throws SVNException {
-        // TODO: combiner 따위 무시하고 그냥 input stream을 돌려주고 있다. 괜찮나?
         Repository repository = ((GitFS)getOwner()).getGitRepository();
         try {
             path = DAVPathUtil.dropLeadingSlash(path);

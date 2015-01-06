@@ -4,10 +4,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     version="2.5">
-    <servlet>
-        <servlet-name>Hello</servlet-name>
-        <servlet-class>com.naver.svngit.HelloServlet</servlet-class>
-    </servlet>
 
     <servlet>
         <servlet-name>svn</servlet-name>
@@ -35,11 +31,6 @@
     <servlet-mapping>
         <servlet-name>svn2</servlet-name>
         <url-pattern>/svn2/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>Hello</servlet-name>
-        <url-pattern>/hello/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

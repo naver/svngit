@@ -1,16 +1,9 @@
-package org.tmatesoft.svn.core.internal.server.dav.handlers;
-
-/*
- * ====================================================================
- * Copyright (c) 2004-2008 TMate Software Ltd.  All rights reserved.
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
  *
- * This software is licensed as described in the file COPYING, which
- * you should have received as part of this distribution.  The terms
- * are also available at http://svnkit.com/license.html.
- * If newer versions of this license are posted there, you may use a
- * newer version instead, at your option.
- * ====================================================================
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
  */
+package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,10 +19,6 @@ import org.xml.sax.Attributes;
 
 import java.util.logging.Level;
 
-/**
- * @author TMate Software Ltd.
- * @version 1.2.0
- */
 public class SVNGitDAVReportHandler extends DAVReportHandler {
     private HttpServletRequest myRequest;
     private HttpServletResponse myResponse;

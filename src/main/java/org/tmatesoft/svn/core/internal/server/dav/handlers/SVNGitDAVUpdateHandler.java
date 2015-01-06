@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
 import org.tmatesoft.svn.core.internal.io.fs.SVNGitRepositoryFactory;
@@ -43,10 +48,6 @@ import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
 import org.xml.sax.Attributes;
 
-/**
- * @author TMate Software Ltd.
- * @version 1.2.0
- */
 public class SVNGitDAVUpdateHandler extends DAVUpdateHandler {
 
     private static Set UPDATE_REPORT_NAMESPACES = new SVNHashSet();
@@ -708,11 +709,6 @@ public class SVNGitDAVUpdateHandler extends DAVUpdateHandler {
     }
 
     private StringBuffer addVersionURL(String path, StringBuffer xmlBuffer) {
-        // TODO: DAVServletUtil.getSafeCreatedRevision은 사용하지 말아야 할 것 같다. 뭐하는건지도 잘 모르겠고 "id" 정보를 요구하고 있어서 동작하게 하기 어려움
-        // myRevisionRoot는 왜 필요한가?
-        // 상대경로인가? 일단 무시
-        // 이 path가 최초로 생성된 revision을 반환해야하는데 이거 꽤 어려울 수 있다. JGit 버그때문에. 그냥 느리더라도 jgit.log를 쓰는 게 나을지도.
-        // TODO: 여기서 revisionNode에 대한 setMD5HexDigest()도 했어야 했나보다.
         long revision = myRevisionRoot.getRevision();
 
         try {

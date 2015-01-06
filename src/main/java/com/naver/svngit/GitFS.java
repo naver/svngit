@@ -1,3 +1,8 @@
+/**
+ * Original From SVNKit (http://svnkit.com/index.html)
+ *
+ * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
+ */
 package com.naver.svngit;
 
 import org.eclipse.jgit.api.Git;
@@ -21,17 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by nori on 14. 12. 23.
- */
 public class GitFS extends FSFS {
     private Repository myGitRepository;
-
     public GitFS(File repositoryRoot) {
         super(repositoryRoot);
     }
 
-    // TODO: Git 저장소를 찾는 기능으로 개조하기
     public static String findRepositoryRoot(String host, String path) {
         if (path == null) {
             path = "";
@@ -56,13 +56,12 @@ public class GitFS extends FSFS {
     }
 
     private static boolean isRepositoryRoot(File rootPath) {
-        // TODO: 구현하기
+        // TODO: Implement
         return true;
     }
 
     public long getYoungestRevision() throws SVNException {
         try {
-            // TODO refs/svn/lastest가 자동으로 생성되도록 해야함
             String prefix = "refs/svn/";
             Ref latest = myGitRepository.getRef(prefix + "latest");
             if (latest == null) {
@@ -85,8 +84,8 @@ public class GitFS extends FSFS {
             setYoungestRevisionCache(youngestRevision);
             return youngestRevision;
         } catch (IOException e) {
-            // FIXME: error handling
-            return 0;
+            throw new SVNException(
+                    SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"), e);
         }
     }
 
@@ -210,7 +209,7 @@ public class GitFS extends FSFS {
                 entry.setType(treeWalk.isSubtree() ? SVNNodeKind.DIR : SVNNodeKind.FILE);
                 FSID id = FSID.createRevId(treeWalk.getObjectId(0).getName(), null, revNode.getCreatedRevision(), -1); // FIXME
                 entry.setId(id);
-                map.put(name, entry); // 여기서 entry에 정보가 부족하면 나중에 NPE를 만나게 된다.
+                map.put(name, entry);
             }
         } catch (IOException e) {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get dir contents"), e);
@@ -279,24 +278,11 @@ public class GitFS extends FSFS {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get properties from a commit"), e);
         }
         return properties;
-        /*
-        try{
-            return readRevisionProperties(revision);
-        } catch(SVNException e ) {
-            if(e.getErrorMessage().getErrorCode()==SVNErrorCode.FS_NO_SUCH_REVISION && myDBFormat >= MIN_PACKED_REVPROP_FORMAT ) {
-                updateMinUnpackedRevProp();
-                return readRevisionProperties(revision);
-            }
-            throw e;
-        }
-        */
     }
 
     @Override
     public String getUUID() throws SVNException {
-        // uuid를 정하기가 매우매우매우매우 어렵다. 그냥 랜덤으로 생성해서 저장해둘까
         // FIXME
-
         return "fake-uuid";
     }
 
@@ -322,7 +308,7 @@ public class GitFS extends FSFS {
         } catch (IOException e) {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get properties from a commit"), e);
         }
-        // TODO: 다른 값들은 어떻게 설정하지? 최소한 type은 반드시 설정해야한다.
+
         return node;
     }
 }
