@@ -20,6 +20,7 @@ import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Created by nori on 14. 12. 28.
@@ -51,6 +52,8 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
             // String uniquifier = myTxnID + '/' + uniqueSuffix;
             // textRep.setUniquifier(uniquifier);
             node.setTextRepresentation(rep);
+            FSID id = FSID.createRevId(null, null, node.getCreatedRevision(), -1); // FIXME
+            node.setId(id);
             return node;
         }
 
@@ -96,5 +99,18 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
         } catch (IOException e) {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to stream a file"), e);
         }
+    }
+
+    @Override
+    public FSRevisionNode getRootRevisionNode() throws SVNException {
+        // TODO: Is this correct?
+        /*
+        Repository repository = ((GitFS)getOwner()).getGitRepository();
+        FSRevisionNode node = new GitFSRevisionNode(repository);
+        node.setCreatedPath("");
+        node.setType(SVNNodeKind.DIR);
+        return node;
+        */
+        return getRevisionNode("");
     }
 }

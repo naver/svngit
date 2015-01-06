@@ -1,10 +1,11 @@
 package com.naver.svngit;
 
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryBuilder;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.tmatesoft.svn.core.*;
@@ -18,11 +19,7 @@ import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by nori on 14. 12. 23.
@@ -67,10 +64,23 @@ public class GitFS extends FSFS {
         try {
             // TODO refs/svn/lastest가 자동으로 생성되도록 해야함
             String prefix = "refs/svn/";
-            Ref ref = myGitRepository.getRef(prefix + "latest");
+            Ref latest = myGitRepository.getRef(prefix + "latest");
+            if (latest == null) {
+                try {
+                    createSvnRefs();
+                    latest = myGitRepository.getRef(prefix + "latest");
+                } catch (GitAPIException e) {
+                    throw new SVNException(
+                            SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"), e);
+                }
+                if (latest == null) {
+                    throw new SVNException(
+                            SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"));
+                }
+            }
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "repo " + myGitRepository.getDirectory().getAbsolutePath());
-            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "ref " + ref);
-            Ref target = ref.getTarget();
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "ref " + latest);
+            Ref target = latest.getTarget();
             long youngestRevision = Long.valueOf(target.getName().replaceFirst(prefix, ""));
             setYoungestRevisionCache(youngestRevision);
             return youngestRevision;
@@ -78,6 +88,59 @@ public class GitFS extends FSFS {
             // FIXME: error handling
             return 0;
         }
+    }
+
+    private void checkRefUpdateResult(RefUpdate.Result rc) throws SVNException {
+        switch (rc) {
+            case REJECTED:
+            case NOT_ATTEMPTED:
+            case IO_FAILURE:
+            case LOCK_FAILURE:
+            case REJECTED_CURRENT_BRANCH:
+                throw new SVNException(
+                        SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to update refs for SVN revisions: " + rc));
+            default:
+                break;
+        }
+    }
+
+    // Return the latest ref
+    private void createSvnRefs() throws GitAPIException, IOException, SVNException {
+        Git git = new Git(myGitRepository);
+
+        Ref latest = myGitRepository.getRef("refs/svn/latest");
+        if (latest != null && latest.getObjectId().equals(
+                myGitRepository.getRef(Constants.HEAD).getObjectId())) {
+            // We don't need to create svn refs
+            return;
+        }
+
+        LinkedList<RevCommit> commits = new LinkedList<>();
+        for(RevCommit commit : git.log().call()) {
+            commits.addFirst(commit);
+        }
+
+        for(int rev = commits.size(); rev > 0; rev--) {
+            // revision to commit id
+            RefUpdate refUpdate = myGitRepository.updateRef("refs/svn/" + rev);
+            refUpdate.setNewObjectId(commits.get(rev - 1).getId());
+            refUpdate.setForceUpdate(true);
+            RefUpdate.Result rc = refUpdate.update();
+            checkRefUpdateResult(rc);
+            if (rc == RefUpdate.Result.NO_CHANGE) {
+                break;
+            }
+
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "Update ref: " + refUpdate.getRef());
+
+            // commit id to revision
+            refUpdate = myGitRepository.updateRef("refs/svn/id/" + commits.get(rev - 1).getId().getName());
+            checkRefUpdateResult(refUpdate.link("refs/svn/" + rev));
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "Update ref: " + refUpdate.getRef());
+        }
+        RefUpdate refUpdate = myGitRepository.updateRef("refs/svn/latest");
+        checkRefUpdateResult(refUpdate.link("refs/svn/" + commits.size()));
+        SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "Update ref: " + refUpdate.getRef());
     }
 
     @Override
@@ -122,89 +185,39 @@ public class GitFS extends FSFS {
 
     @Override
     public Map getDirContents(FSRevisionNode revNode) throws SVNException {
-        FSRepresentation txtRep = revNode.getTextRepresentation();
-        /*
-        if (txtRep != null && txtRep.isTxn()) {
-            FSFile childrenFile = getTransactionRevisionNodeChildrenFile(revNode.getId());
-            Map entries = null;
-            try {
-                SVNProperties rawEntries = childrenFile.readProperties(false, false);
-                rawEntries.putAll(childrenFile.readProperties(true, false));
+        String path = revNode.getCreatedPath();
+        SVNHashMap map = new SVNHashMap();
 
-                rawEntries.removeNullValues();
-
-                entries = parsePlainRepresentation(rawEntries, true);
-            } finally {
-                childrenFile.close();
+        try {
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - path: " + path);
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - rev: " + revNode.getCreatedRevision());
+            ObjectId commitId = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revNode.getCreatedRevision());
+            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - commitId: " + commitId);
+            TreeWalk treeWalk;
+            // FIXME: It may be slow.
+            RevTree rootTree = new RevWalk(myGitRepository).parseTree(commitId);
+            if (path == null || path.isEmpty()) {
+                treeWalk = new TreeWalk(myGitRepository);
+                treeWalk.addTree(rootTree);
+            } else {
+                treeWalk = TreeWalk.forPath(myGitRepository, path, rootTree);
+                treeWalk.enterSubtree();
             }
-            return entries;
-        } else if (txtRep != null) {
-        */
-        if (txtRep != null) {
-            String path = revNode.getCreatedPath();
-            SVNHashMap map = new SVNHashMap();
-
-            try {
-                SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - path: " + path);
-                SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - rev: " + revNode.getCreatedRevision());
-                ObjectId commitId = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revNode.getCreatedRevision());
-                SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "getDirContents - commitId: " + commitId);
-                TreeWalk treeWalk;
-                // FIXME: It may be slow.
-                if (path.isEmpty()) {
-                    treeWalk = new TreeWalk(myGitRepository);
-                    treeWalk.addTree(new RevWalk(myGitRepository).parseCommit(commitId).getTree());
-                } else {
-                    treeWalk = TreeWalk.forPath(myGitRepository, path, commitId);
-                }
-                while(treeWalk.next()) {
-                    String name = treeWalk.getNameString();
-                    FSEntry entry = new FSEntry();
-                    entry.setName(name);
-                    FSID id = FSID.createRevId(treeWalk.getObjectId(0).getName(), null, revNode.getCreatedRevision(), -1); // FIXME
-                    entry.setId(id);
-                    map.put(name, entry); // 여기서 entry에 정보가 부족하면 나중에 NPE를 만나게 된다.
-                }
-            } catch (IOException e) {
-                SVNDebugLog.getDefaultLog().logError(SVNLogType.DEFAULT, e.getMessage());
+            while(treeWalk.next()) {
+                String name = treeWalk.getNameString();
+                FSEntry entry = new FSEntry();
+                entry.setName(name);
+                entry.setType(treeWalk.isSubtree() ? SVNNodeKind.DIR : SVNNodeKind.FILE);
+                FSID id = FSID.createRevId(treeWalk.getObjectId(0).getName(), null, revNode.getCreatedRevision(), -1); // FIXME
+                entry.setId(id);
+                map.put(name, entry); // 여기서 entry에 정보가 부족하면 나중에 NPE를 만나게 된다.
             }
-
-            // TODO: and so on...
-            return map;
-            /*
-            FSFile revisionFile = null;
-            try {
-                revisionFile = openAndSeekRepresentation(txtRep);
-                String repHeader = revisionFile.readLine(160);
-
-                if (!"PLAIN".equals(repHeader)) {
-                    SVNErrorMessage err = SVNErrorMessage.create(SVNErrorCode.FS_CORRUPT, "Malformed representation header");
-                    SVNErrorManager.error(err, SVNLogType.FSFS);
-                }
-
-                revisionFile.resetDigest();
-                SVNProperties rawEntries = revisionFile.readProperties(false, false);
-                String checksum = revisionFile.digest();
-
-                if (!checksum.equals(txtRep.getMD5HexDigest())) {
-                    SVNErrorMessage err = SVNErrorMessage.create(SVNErrorCode.FS_CORRUPT,
-                            "Checksum mismatch while reading representation:\n   expected:  {0}\n     actual:  {1}",
-                            new Object[]{checksum, txtRep.getMD5HexDigest()});
-                    SVNErrorManager.error(err, SVNLogType.FSFS);
-                }
-
-                return parsePlainRepresentation(rawEntries, false);
-            } finally {
-                if (revisionFile != null) {
-                    revisionFile.close();
-                }
-            }
-            */
+        } catch (IOException e) {
+            throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get dir contents"), e);
         }
-        /*
-        }
-        */
-        return new SVNHashMap();// returns an empty map, must not be null!!
+
+        // TODO: and so on...
+        return map;
     }
 
     private Map parsePlainRepresentation(SVNProperties entries, boolean mayContainNulls) throws SVNException {
@@ -285,5 +298,31 @@ public class GitFS extends FSFS {
         // FIXME
 
         return "fake-uuid";
+    }
+
+    @Override
+    public FSRevisionNode getRevisionNode(FSID id) throws SVNException  {
+        FSRevisionNode node = new GitFSRevisionNode(myGitRepository);
+        node.setId(id);
+        FSRepresentation rep = new FSRepresentation();
+        rep.setRevision(id.getRevision());
+        node.setTextRepresentation(rep);
+
+        try {
+            switch(myGitRepository.getObjectDatabase().open(myGitRepository.resolve(id.getNodeID())).getType()) {
+                case Constants.OBJ_BLOB:
+                    node.setType(SVNNodeKind.FILE);
+                    break;
+                case Constants.OBJ_TREE:
+                    node.setType(SVNNodeKind.DIR);
+                    break;
+                default:
+                    throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Unexpected type"));
+            }
+        } catch (IOException e) {
+            throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get properties from a commit"), e);
+        }
+        // TODO: 다른 값들은 어떻게 설정하지? 최소한 type은 반드시 설정해야한다.
+        return node;
     }
 }

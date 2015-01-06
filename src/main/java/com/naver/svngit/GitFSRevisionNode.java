@@ -33,10 +33,10 @@ public class GitFSRevisionNode extends FSRevisionNode {
     public long getCreatedRevision() {
         String path = getCreatedPath();
         try {
-            long revision = getTextRepresentation().getRevision();
+            long revision = getTextRepresentation().getRevision(); // FIXME: NPE를 고쳐야 한다.
             ObjectId commitId = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revision);
             LogCommand logCommand = new Git(myGitRepository).log().add(commitId);
-            if (!path.isEmpty()) {
+            if (path != null && !path.isEmpty()) {
                 logCommand.addPath(path);
             }
             Iterable<RevCommit> log = logCommand.call();
@@ -47,7 +47,7 @@ public class GitFSRevisionNode extends FSRevisionNode {
             Ref target = ref.getTarget();
             return SVNGitUtil.getRevisionFromRefName(target.getName());
         } catch (Exception e) {
-            SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, e.getMessage());
+            e.printStackTrace(); // FIXME: stack trace를 출력할 다른 방법을 모름
         }
 
         return -1; // FIXME: is this correct?
