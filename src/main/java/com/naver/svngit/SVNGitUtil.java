@@ -1,19 +1,4 @@
 /**
- * Original From SVNKit (http://svnkit.com/index.html)
- *
- * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
- */
-package com.naver.svngit;
-
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-
-import java.io.IOException;
-
-/**
  * SVNGit
  *
  * Copyright 2015 NAVER Corp.
@@ -32,6 +17,16 @@ import java.io.IOException;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.naver.svngit;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+
+import java.io.IOException;
+
 public class SVNGitUtil {
     public static long getRevisionFromRefName(String refName) {
         int index = refName.lastIndexOf('/');

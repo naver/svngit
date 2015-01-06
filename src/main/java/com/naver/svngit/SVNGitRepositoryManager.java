@@ -29,10 +29,6 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
 
-/**
- * @author TMate Software Ltd.
- * @version 1.2.0
- */
 public class SVNGitRepositoryManager extends DAVRepositoryManager {
 
     private static final String FILE_PROTOCOL_LINE = "file://";

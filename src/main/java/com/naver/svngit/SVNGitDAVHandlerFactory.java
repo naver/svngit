@@ -15,9 +15,6 @@ import org.tmatesoft.svn.core.internal.server.dav.handlers.ServletDAVHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Created by nori on 14. 12. 28.
- */
 public class SVNGitDAVHandlerFactory extends DAVHandlerFactory {
     public static ServletDAVHandler createHandler(DAVRepositoryManager manager, HttpServletRequest request, HttpServletResponse response) throws SVNException {
         String methodName = request.getMethod();

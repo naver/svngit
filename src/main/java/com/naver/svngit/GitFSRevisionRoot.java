@@ -27,9 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-/**
- * Created by nori on 14. 12. 28.
- */
 public class GitFSRevisionRoot extends FSRevisionRoot {
     public GitFSRevisionRoot(FSFS owner, long revision) {
         super(owner, revision);

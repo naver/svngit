@@ -12,9 +12,6 @@ import org.tmatesoft.svn.core.io.ISVNSession;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 
-/**
- * Created by nori on 14. 12. 23.
- */
 public class SVNGitRepositoryFactory extends SVNRepositoryFactory {
     @Override
     protected SVNRepository createRepositoryImpl(SVNURL url, ISVNSession options) {

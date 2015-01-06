@@ -27,9 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
-/**
- * Created by nori on 14. 12. 23.
- */
 // TODO: make it works
 public class SVNGitRepository extends FSRepository {
 

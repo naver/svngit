@@ -28,9 +28,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * Created by nori on 14. 12. 16.
- */
 public class SVNGitServlet extends DAVServlet {
     public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ServletDAVHandler handler = null;
