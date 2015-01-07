@@ -4,7 +4,7 @@ A servlet implementation for SVN clients to access Git repositories
 
     SVN Client --> SVNGit Server (SVNGit + Jetty or Tomcat) --> Git repositories
 
-*Note*: This is an early-stage experimental project.
+**Note**: This is an early-stage experimental project.
 
 ## Feature
 
@@ -26,25 +26,25 @@ We will support most of basic SVN commands as Github does.
 
 1. Rename web.sample.xml to web.xml in src/main/webapp/WEB-INF and edit it
 
-If your Git repository is /path/to/gitroot/repo.git and you want to access the
+   If your Git repository is /path/to/gitroot/repo.git and you want to access the
 repository with a url such as "http://localhost:8080/svngit/repo", set
 SVNParentPath and the url pattern as follows:
 
-    ...
-    <servlet>
-        <servlet-name>svngit</servlet-name>
-        <servlet-class>com.naver.svngit.SVNGitServlet</servlet-class>
-        <init-param>
-            <param-name>SVNParentPath</param-name>
-            <param-value>/path/to/gitroot</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>svngit</servlet-name>
-        <url-pattern>/svngit/*</url-pattern>
-    </servlet-mapping>
-    ...
+        ...
+        <servlet>
+            <servlet-name>svngit</servlet-name>
+            <servlet-class>com.naver.svngit.SVNGitServlet</servlet-class>
+            <init-param>
+                <param-name>SVNParentPath</param-name>
+                <param-value>/path/to/gitroot</param-value>
+            </init-param>
+        </servlet>
+    
+        <servlet-mapping>
+            <servlet-name>svngit</servlet-name>
+            <url-pattern>/svngit/*</url-pattern>
+        </servlet-mapping>
+        ...
 
 2. Run jetty
 
@@ -73,8 +73,9 @@ SVNParentPath and the url pattern as follows:
 ```
 
 All the source codes in package org.tmatesoft.svn.core.internal and
-com.naver.svngit except class com.naver.svngit.SVNGitUtil, which originate from SVNKit(http://svnkit.com/index.html), are covered by The TMate License.  
-Please check The TMate License in the NOTICE file before you use this SW.
+com.naver.svngit except class com.naver.svngit.SVNGitUtil, which originate from
+SVNKit(http://svnkit.com/index.html), are covered by The TMate License.
 
+Please check The TMate License in the NOTICE file before you use this SW.
 
 ## Pull requests are welcomed!
