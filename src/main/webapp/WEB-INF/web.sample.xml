@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5">
+
+    <servlet>
+        <servlet-name>svngit</servlet-name>
+        <servlet-class>com.naver.svngit.SVNGitServlet</servlet-class>
+        <init-param>
+            <param-name>SVNParentPath</param-name>
+            <param-value>/path/to/gitroot</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>svngit</servlet-name>
+        <url-pattern>/svngit/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
