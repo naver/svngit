@@ -1,0 +1,7 @@
+All the source codes in package org.tmatesoft.svn.core.internal and
+com.naver.svngit except class com.naver.svngit.SVNGitUtil, which originate
+from SVNKit(http://svnkit.com/index.html), are covered by the license in
+TMATE-LICENSE.txt file.
+
+The other files are covered by Apache License 2.0 which is described in
+APACHE20-LICENSE.txt.
