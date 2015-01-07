@@ -4,10 +4,10 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.example</groupId>
-    <artifactId>svn-to-git</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>svngit</artifactId>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
-    <name>SVN to Git</name>
+    <name>SVNGit</name>
 
     <properties>
         <jettyVersion>9.2.6.v20141205</jettyVersion>
@@ -60,17 +60,6 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jettyVersion}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution><goals><goal>java</goal></goals></execution>
-                </executions>
-                <configuration>
-                    <mainClass>org.example.HelloWorld</mainClass>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
