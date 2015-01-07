@@ -5,7 +5,6 @@
  */
 package com.naver.svngit;
 
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -19,13 +18,11 @@ import org.tmatesoft.svn.core.internal.delta.SVNDeltaCombiner;
 import org.tmatesoft.svn.core.internal.io.fs.*;
 import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
 import org.tmatesoft.svn.core.internal.util.SVNPathUtil;
-import org.tmatesoft.svn.core.internal.wc.SVNErrorManager;
 import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 public class GitFSRevisionRoot extends FSRevisionRoot {
     public GitFSRevisionRoot(FSFS owner, long revision) {
@@ -86,7 +83,7 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
         try {
             path = DAVPathUtil.dropLeadingSlash(path);
             RevCommit commit = SVNGitUtil.getCommitFromRevision(repository, getRevision());
-            TreeWalk treeWalk = new TreeWalk(repository).forPath(repository, path, commit.getTree());
+            TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree());
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "stream path: " + path);
             return repository.open(treeWalk.getObjectId(0)).openStream();
         } catch (IOException e) {

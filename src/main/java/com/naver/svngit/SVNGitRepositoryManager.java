@@ -42,9 +42,7 @@ public class SVNGitRepositoryManager extends DAVRepositoryManager {
     private File myRepositoryRootDir;
 
     public SVNGitRepositoryManager(DAVConfig config, HttpServletRequest request) throws SVNException {
-        // 이 생성자 안에서 어떤 일이 일어나는가? 실행해도 무방한가? filesystem에 접근하지 않는가?
-        // 여기서 myRepositoryPathInfo를 설정한다. parent-path/uri의head
-
+        // FIXME: Do we need this?
         super(config, request);
 
         if (config == null) {

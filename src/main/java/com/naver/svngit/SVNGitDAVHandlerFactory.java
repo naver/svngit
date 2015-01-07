@@ -8,7 +8,6 @@ package com.naver.svngit;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.internal.server.dav.DAVRepositoryManager;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.DAVHandlerFactory;
-import org.tmatesoft.svn.core.internal.server.dav.handlers.DAVReportHandler;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.SVNGitDAVReportHandler;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.ServletDAVHandler;
 

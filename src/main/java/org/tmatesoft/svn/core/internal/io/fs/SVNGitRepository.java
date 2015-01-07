@@ -71,7 +71,6 @@ public class SVNGitRepository extends FSRepository {
         }
 
         String startPath = SVNEncodingUtil.uriDecode(getLocation().getURIEncodedPath());
-        // TODO: findRepositoryRoot가 호출하는 isRepositoryRoot가 Git 저장소를 저장소라고 판단하도록 고친다.
         String rootPath = GitFS.findRepositoryRoot(hasCustomHostName ? hostName : null, startPath) + ".git";
         if (rootPath == null) {
             SVNErrorMessage err = SVNErrorMessage.create(SVNErrorCode.RA_LOCAL_REPOS_OPEN_FAILED, "Unable to open repository ''{0}''", getLocation().toString());

@@ -5,8 +5,6 @@
  */
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
-import org.tmatesoft.svn.core.internal.io.fs.SVNGitRepositoryFactory;
-
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;

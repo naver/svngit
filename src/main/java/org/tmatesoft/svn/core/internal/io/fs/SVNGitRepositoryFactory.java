@@ -18,7 +18,7 @@ public class SVNGitRepositoryFactory extends SVNRepositoryFactory {
         return new SVNGitRepository(url, options);
     }
 
-    public static SVNRepository create(SVNURL url) throws SVNException {
+    public static SVNRepository create(SVNURL url) {
         return new SVNGitRepository(url, null);
     }
 }

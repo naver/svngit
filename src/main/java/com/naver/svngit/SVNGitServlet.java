@@ -12,7 +12,6 @@ import org.tmatesoft.svn.core.internal.server.dav.DAVException;
 import org.tmatesoft.svn.core.internal.server.dav.DAVRepositoryManager;
 import org.tmatesoft.svn.core.internal.server.dav.DAVServlet;
 import org.tmatesoft.svn.core.internal.server.dav.DAVXMLUtil;
-import org.tmatesoft.svn.core.internal.server.dav.handlers.DAVHandlerFactory;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.ServletDAVHandler;
 import org.tmatesoft.svn.core.internal.util.SVNEncodingUtil;
 import org.tmatesoft.svn.core.internal.util.SVNXMLUtil;

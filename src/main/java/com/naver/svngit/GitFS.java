@@ -6,7 +6,6 @@
 package com.naver.svngit;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -219,47 +218,7 @@ public class GitFS extends FSFS {
         return map;
     }
 
-    private Map parsePlainRepresentation(SVNProperties entries, boolean mayContainNulls) throws SVNException {
-        Map representationMap = new SVNHashMap();
-
-        for (Iterator iterator = entries.nameSet().iterator(); iterator.hasNext();) {
-            String name = (String) iterator.next();
-            String unparsedEntry = entries.getStringValue(name);
-
-            if (unparsedEntry == null && mayContainNulls) {
-                continue;
-            }
-
-            FSEntry nextRepEntry = parseRepEntryValue(name, unparsedEntry);
-            if (nextRepEntry == null) {
-                SVNErrorMessage err = SVNErrorMessage.create(SVNErrorCode.FS_CORRUPT, "Directory entry corrupt");
-                SVNErrorManager.error(err, SVNLogType.FSFS);
-            }
-            representationMap.put(name, nextRepEntry);
-        }
-        return representationMap;
-    }
-
-    private FSEntry parseRepEntryValue(String name, String value) {
-        if (value == null) {
-            return null;
-        }
-        int spaceInd = value.indexOf(' ');
-        if (spaceInd == -1) {
-            return null;
-        }
-        String kind = value.substring(0, spaceInd);
-        String rawID = value.substring(spaceInd + 1);
-
-        SVNNodeKind type = SVNNodeKind.parseKind(kind);
-        FSID id = FSID.fromString(rawID);
-        if ((type != SVNNodeKind.DIR && type != SVNNodeKind.FILE) || id == null) {
-            return null;
-        }
-        return new FSEntry(id, type, name);
-    }
-
-    @Override
+   @Override
     public SVNProperties getRevisionProperties(long revision) throws SVNException {
         SVNProperties properties = new SVNProperties();
         try {
