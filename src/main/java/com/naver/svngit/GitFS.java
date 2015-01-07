@@ -59,6 +59,7 @@ public class GitFS extends FSFS {
         return true;
     }
 
+    @Override
     public long getYoungestRevision() throws SVNException {
         try {
             String prefix = "refs/svn/";
@@ -154,6 +155,7 @@ public class GitFS extends FSFS {
         myGitRepository.close();
     }
 
+    @Override
     public FSRevisionRoot createRevisionRoot(long revision) throws SVNException {
         ensureRevisionsExists(revision);
         return new GitFSRevisionRoot(this, revision);

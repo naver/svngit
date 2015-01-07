@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SVNGitServlet extends DAVServlet {
+    @Override
     public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ServletDAVHandler handler = null;
         logRequest(request);//TODO: remove later

@@ -138,18 +138,22 @@ public class SVNGitRepositoryManager extends DAVRepositoryManager {
 
     }
 
+    @Override
     public String getResourceRepositoryRoot() {
         return myResourceRepositoryRoot;
     }
 
+    @Override
     public String getResourceContext() {
         return myResourceContext;
     }
 
+    @Override
     public String getResourcePathInfo() {
         return myResourcePathInfo;
     }
 
+    @Override
     public SVNURL convertHttpToFile(SVNURL url) throws SVNException {
         String uri = DAVPathUtil.addLeadingSlash(url.getURIEncodedPath());
         if (!uri.startsWith(getResourceContext())) {
@@ -158,12 +162,14 @@ public class SVNGitRepositoryManager extends DAVRepositoryManager {
         return SVNURL.parseURIEncoded(getResourceRepositoryRoot() + getRepositoryRelativePath(url));
     }
 
+    @Override
     public String getRepositoryRelativePath(SVNURL url) throws SVNException {
         String uri = getURI(url);
         DAVResourceURI resourceURI = new DAVResourceURI(null, uri, null, false);
         return resourceURI.getPath();
     }
 
+    @Override
     public String getURI(SVNURL url) throws SVNException {
         String uri = DAVPathUtil.addLeadingSlash(url.getURIEncodedPath());
         if (uri.startsWith(getResourceContext())) {
@@ -176,6 +182,7 @@ public class SVNGitRepositoryManager extends DAVRepositoryManager {
         return uri;
     }
 
+    @Override
     public DAVResource getRequestedDAVResource(boolean isSVNClient, String deltaBase, String pathInfo, long version, String clientOptions,
             String baseChecksum, String resultChecksum, String label, boolean useCheckedIn, List lockTokens, Map capabilities) throws SVNException {
         pathInfo = pathInfo == null ? getResourcePathInfo() : pathInfo;
