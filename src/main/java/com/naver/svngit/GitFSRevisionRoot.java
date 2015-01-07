@@ -93,14 +93,7 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
 
     @Override
     public FSRevisionNode getRootRevisionNode() throws SVNException {
-        // TODO: Is this correct?
-        /*
-        Repository repository = ((GitFS)getOwner()).getGitRepository();
-        FSRevisionNode node = new GitFSRevisionNode(repository);
-        node.setCreatedPath("");
-        node.setType(SVNNodeKind.DIR);
-        return node;
-        */
+        // FIXME: Is this correct?
         return getRevisionNode("");
     }
 }

@@ -3,7 +3,7 @@
  *
  * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
  */
-package org.tmatesoft.svn.core.internal.io.fs; // 오직 myLocationsFinder.reset(getFSFS()); 를 호출하기 위해 이 패키지로 옮김
+package org.tmatesoft.svn.core.internal.io.fs; // To call myLocationsFinder.reset()
 
 import com.naver.svngit.GitFS;
 import org.tmatesoft.svn.core.*;
@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
-// TODO: make it works
 public class SVNGitRepository extends FSRepository {
 
     private FSUpdateContext myReporterContext; // TODO: init this

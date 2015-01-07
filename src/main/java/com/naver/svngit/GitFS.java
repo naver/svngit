@@ -102,7 +102,6 @@ public class GitFS extends FSFS {
         }
     }
 
-    // Return the latest ref
     private void createSvnRefs() throws GitAPIException, IOException, SVNException {
         Git git = new Git(myGitRepository);
 
