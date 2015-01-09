@@ -66,19 +66,17 @@ public class GitFS extends FSFS {
     public long getYoungestRevision() throws SVNException {
         try {
             String prefix = "refs/svn/";
-            Ref latest = myGitRepository.getRef(prefix + "latest");
+            Ref latest;
+            try {
+                updateSvnRefs();
+                latest = myGitRepository.getRef(prefix + "latest");
+            } catch (GitAPIException e) {
+                throw new SVNException(
+                        SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"), e);
+            }
             if (latest == null) {
-                try {
-                    createSvnRefs();
-                    latest = myGitRepository.getRef(prefix + "latest");
-                } catch (GitAPIException e) {
-                    throw new SVNException(
-                            SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"), e);
-                }
-                if (latest == null) {
-                    throw new SVNException(
-                            SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"));
-                }
+                throw new SVNException(
+                        SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to get youngest revision"));
             }
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "repo " + myGitRepository.getDirectory().getAbsolutePath());
             SVNDebugLog.getDefaultLog().logFine(SVNLogType.DEFAULT, "ref " + latest);
@@ -106,7 +104,7 @@ public class GitFS extends FSFS {
         }
     }
 
-    private void createSvnRefs() throws GitAPIException, IOException, SVNException {
+    private void updateSvnRefs() throws GitAPIException, IOException, SVNException {
         Git git = new Git(myGitRepository);
 
         Ref latest = myGitRepository.getRef("refs/svn/latest");
