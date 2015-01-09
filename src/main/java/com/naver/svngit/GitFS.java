@@ -14,6 +14,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.internal.io.fs.*;
+import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
 import org.tmatesoft.svn.core.internal.util.SVNDate;
 import org.tmatesoft.svn.core.internal.util.SVNHashMap;
 import org.tmatesoft.svn.core.internal.util.SVNPathUtil;
@@ -23,7 +24,9 @@ import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class GitFS extends FSFS {
     private Repository myGitRepository;
@@ -184,7 +187,7 @@ public class GitFS extends FSFS {
 
     @Override
     public Map getDirContents(FSRevisionNode revNode) throws SVNException {
-        String path = revNode.getCreatedPath();
+        String path = DAVPathUtil.dropLeadingSlash(revNode.getCreatedPath());
         SVNHashMap map = new SVNHashMap();
 
         try {
@@ -254,8 +257,10 @@ public class GitFS extends FSFS {
         rep.setRevision(id.getRevision());
         node.setTextRepresentation(rep);
 
+        // FIXME: We should set created path to the node
         try {
-            switch(myGitRepository.getObjectDatabase().open(myGitRepository.resolve(id.getNodeID())).getType()) {
+            ObjectLoader objectLoader = myGitRepository.getObjectDatabase().open(myGitRepository.resolve(id.getNodeID()));
+            switch(objectLoader.getType()) {
                 case Constants.OBJ_BLOB:
                     node.setType(SVNNodeKind.FILE);
                     break;

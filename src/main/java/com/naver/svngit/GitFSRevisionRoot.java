@@ -18,6 +18,7 @@ import org.tmatesoft.svn.core.internal.delta.SVNDeltaCombiner;
 import org.tmatesoft.svn.core.internal.io.fs.*;
 import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
 import org.tmatesoft.svn.core.internal.util.SVNPathUtil;
+import org.tmatesoft.svn.core.internal.wc.SVNErrorManager;
 import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
 
@@ -96,4 +97,78 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
         // FIXME: Is this correct?
         return getRevisionNode("");
     }
+
+    @Override
+    public FSParentPath openPath(String path, boolean lastEntryMustExist, boolean storeParents) throws SVNException {
+        if (path == null) {
+            SVNErrorMessage err = SVNErrorMessage.create(SVNErrorCode.FS_NOT_FOUND, "null path is not supported");
+            SVNErrorManager.error(err, SVNLogType.FSFS);
+        }
+
+        String canonPath = SVNPathUtil.canonicalizeAbsolutePath(path);
+        FSRevisionNode here = getRootRevisionNode();
+        String pathSoFar = "/";
+
+        FSParentPath parentPath = new FSParentPath(here, null, null);
+        parentPath.setCopyStyle(FSCopyInheritance.COPY_ID_INHERIT_SELF);
+
+        // skip the leading '/'
+        String rest = canonPath.substring(1);
+
+        while (true) {
+            String entry = SVNPathUtil.head(rest);
+            String next = SVNPathUtil.removeHead(rest);
+            pathSoFar = SVNPathUtil.getAbsolutePath(SVNPathUtil.append(pathSoFar, entry));
+            FSRevisionNode child = null;
+            if (entry == null || "".equals(entry)) {
+                child = here;
+            } else {
+                FSRevisionNode cachedRevNode = fetchRevNodeFromCache(pathSoFar);
+                if (cachedRevNode != null) {
+                    child = cachedRevNode;
+                } else {
+                    try {
+                        // FIXME: getChildDirNode should set created path here
+                        // but it doesn't because GitFS.getRevisionNode() doesn't.
+                        child = here.getChildDirNode(entry, getOwner());
+                        child.setCreatedPath(here.getCreatedPath() + "/" + entry);
+                    } catch (SVNException svne) {
+                        if (svne.getErrorMessage().getErrorCode() == SVNErrorCode.FS_NOT_FOUND) {
+                            if (!lastEntryMustExist && (next == null || "".equals(next))) {
+                                return new FSParentPath(null, entry, parentPath);
+                            }
+                            SVNErrorManager.error(FSErrors.errorNotFound(this, path), svne, SVNLogType.FSFS);
+                        }
+                        throw svne;
+                    }
+                }
+
+                parentPath.setParentPath(child, entry, storeParents ? new FSParentPath(parentPath) : null);
+
+                if (storeParents) {
+                    FSCopyInheritance copyInheritance = getCopyInheritance(parentPath);
+                    if (copyInheritance != null) {
+                        parentPath.setCopyStyle(copyInheritance.getStyle());
+                        parentPath.setCopySourcePath(copyInheritance.getCopySourcePath());
+                    }
+                }
+
+                if (cachedRevNode == null) {
+                    putRevNodeToCache(pathSoFar, child);
+                }
+            }
+            if (next == null || "".equals(next)) {
+                break;
+            }
+
+            if (child.getType() != SVNNodeKind.DIR) {
+                SVNErrorMessage err = FSErrors.errorNotDirectory(pathSoFar, getOwner());
+                SVNErrorManager.error(err.wrap("Failure opening ''{0}''", path), SVNLogType.FSFS);
+            }
+            rest = next;
+            here = child;
+        }
+        return parentPath;
+    }
+
 }

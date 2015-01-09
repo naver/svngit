@@ -18,6 +18,7 @@ import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNErrorMessage;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.internal.io.fs.FSRevisionNode;
+import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
 import org.tmatesoft.svn.core.internal.wc.SVNErrorManager;
 import org.tmatesoft.svn.util.SVNDebugLog;
 import org.tmatesoft.svn.util.SVNLogType;
@@ -33,6 +34,7 @@ public class GitFSRevisionNode extends FSRevisionNode {
 
     public long getCreatedRevision() {
         String path = getCreatedPath();
+        path = DAVPathUtil.dropLeadingSlash(path);
         try {
             long revision = getTextRepresentation().getRevision(); // FIXME: Fix NPE
             ObjectId commitId = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revision);
