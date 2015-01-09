@@ -33,6 +33,16 @@ public class GitFSRevisionNode extends FSRevisionNode {
     }
 
     public long getCreatedRevision() {
+        // FIXME
+        return getFakeCreatedRevision();
+    }
+
+    private long getFakeCreatedRevision() {
+        return getTextRepresentation().getRevision();
+    }
+
+    // Correct but very slow
+    private long getCreatedRevisionCorrectly() {
         String path = getCreatedPath();
         path = DAVPathUtil.dropLeadingSlash(path);
         try {
