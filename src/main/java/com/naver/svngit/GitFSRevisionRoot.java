@@ -33,7 +33,7 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
     public FSRevisionNode getRevisionNode(String path) throws SVNException {
         path = SVNPathUtil.canonicalizeAbsolutePath(path);
         Repository repository = ((GitFS)getOwner()).getGitRepository();
-        FSRevisionNode node = new GitFSRevisionNode(repository);
+        FSRevisionNode node = new GitFSRevisionNode(((GitFS)getOwner()));
 
         path = DAVPathUtil.dropLeadingSlash(path);
 

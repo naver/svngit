@@ -6,12 +6,16 @@
 package com.naver.svngit;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.io.NullOutputStream;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.internal.io.fs.*;
 import org.tmatesoft.svn.core.internal.server.dav.DAVPathUtil;
@@ -24,9 +28,7 @@ import org.tmatesoft.svn.util.SVNLogType;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class GitFS extends FSFS {
     private Repository myGitRepository;
@@ -249,7 +251,7 @@ public class GitFS extends FSFS {
 
     @Override
     public FSRevisionNode getRevisionNode(FSID id) throws SVNException  {
-        FSRevisionNode node = new GitFSRevisionNode(myGitRepository);
+        FSRevisionNode node = new GitFSRevisionNode(this);
         node.setId(id);
         FSRepresentation rep = new FSRepresentation();
         rep.setRevision(id.getRevision());
@@ -273,5 +275,91 @@ public class GitFS extends FSFS {
         }
 
         return node;
+    }
+
+    //          commit-id     path    commit-id
+    private static Map<ObjectId, Map<String, ObjectId>> lastModifiedCommits = new HashMap<>();
+
+    private void fillLastModifiedCommits(ObjectId start, String basePath) throws IOException, GitAPIException {
+        Map<String, ObjectId> objects = lastModifiedCommits.get(start);
+        if (objects == null) {
+            objects = new TreeMap<>();
+        }
+        DiffFormatter diffFmt = new DiffFormatter(NullOutputStream.INSTANCE);
+        diffFmt.setRepository(getGitRepository());
+        LogCommand log = new Git(getGitRepository()).log();
+        if (!basePath.isEmpty()) {
+            log.addPath(basePath);
+        }
+        for(RevCommit c: log.call()) {
+            final RevTree a = c.getParentCount() > 0 ? c.getParent(0).getTree() : null;
+            final RevTree b = c.getTree();
+
+            for(DiffEntry diff: diffFmt.scan(a, b)) {
+                objects.put(diff.getNewPath(), c.getId());
+            }
+        }
+        lastModifiedCommits.put(start, objects);
+    }
+
+    private ObjectId getCachedLastModifiedCommit(String path, ObjectId start) throws IOException {
+        Map<String, ObjectId> commits = lastModifiedCommits.get(start);
+
+        if (commits == null) {
+            return null;
+        }
+
+        return commits.get(path);
+    }
+
+    private void setCachedLastModifiedCommit(String path, ObjectId lastModified, ObjectId start) throws IOException {
+        Map<String, ObjectId> commits = lastModifiedCommits.get(start);
+
+        if (commits == null) {
+            commits = new HashMap<>();
+            lastModifiedCommits.put(start, commits);
+        }
+
+        commits.put(path, lastModified);
+    }
+
+    public long getCreatedRevision(String path, long revision) {
+        path = DAVPathUtil.dropLeadingSlash(path);
+        if (path.isEmpty()) {
+            // FIXME: Is it always correct?
+            return revision;
+        }
+        try {
+            ObjectId start = SVNGitUtil.getCommitIdFromRevision(myGitRepository, revision);
+            ObjectId lastModified = getCachedLastModifiedCommit(path, start);
+
+            int sep = path.lastIndexOf('/');
+            if (sep < 0) sep = 0;
+            if (lastModified == null) {
+                fillLastModifiedCommits(start, path.substring(0, sep));
+                lastModified = getCachedLastModifiedCommit(path, start);
+            }
+
+            if (lastModified == null) {
+                // slow way
+                LogCommand logCommand = new Git(myGitRepository).log().add(start);
+                if (path != null && !path.isEmpty()) {
+                    logCommand.addPath(path);
+                }
+                Iterable<RevCommit> log = logCommand.call();
+                // Get revision number from name of the ref which is targeted by refs/svn/id/:id
+                // e.g. re        RevTree tree = new RevWalk(getGitRepository()).parseTree(start);fs/svn/id/3bf3247be67c6c918e9ee301ee23294b587452cd
+                RevCommit commit = log.iterator().next();
+                lastModified = commit.getId();
+                setCachedLastModifiedCommit(path, lastModified, start);
+            }
+
+            String name = lastModified.getName();
+            Ref ref = myGitRepository.getRef("refs/svn/id/" + name);
+            Ref target = ref.getTarget();
+            return SVNGitUtil.getRevisionFromRefName(target.getName());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get the created revision", e);
+        }
     }
 }
