@@ -32,6 +32,8 @@ import java.util.*;
 
 public class GitFS extends FSFS {
     private Repository myGitRepository;
+    private static Map<String, FSTransactionInfo> transactions = new HashMap<>();
+
     public GitFS(File repositoryRoot) {
         super(repositoryRoot);
     }
@@ -106,7 +108,7 @@ public class GitFS extends FSFS {
         }
     }
 
-    private void updateSvnRefs() throws GitAPIException, IOException, SVNException {
+    public void updateSvnRefs() throws GitAPIException, IOException, SVNException {
         Git git = new Git(myGitRepository);
 
         Ref latest = myGitRepository.getRef("refs/svn/latest");
@@ -259,7 +261,8 @@ public class GitFS extends FSFS {
 
         // FIXME: We should set created path to the node
         try {
-            ObjectLoader objectLoader = myGitRepository.getObjectDatabase().open(myGitRepository.resolve(id.getNodeID()));
+            ObjectId objectId = myGitRepository.resolve(id.getNodeID());
+            ObjectLoader objectLoader = myGitRepository.getObjectDatabase().open(objectId);
             switch(objectLoader.getType()) {
                 case Constants.OBJ_BLOB:
                     node.setType(SVNNodeKind.FILE);
@@ -354,12 +357,38 @@ public class GitFS extends FSFS {
                 setCachedLastModifiedCommit(path, lastModified, start);
             }
 
-            String name = lastModified.getName();
-            Ref ref = myGitRepository.getRef("refs/svn/id/" + name);
-            Ref target = ref.getTarget();
-            return SVNGitUtil.getRevisionFromRefName(target.getName());
+            return SVNGitUtil.getRevisionFromCommitId(myGitRepository, lastModified);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get the created revision", e);
         }
+    }
+
+    @Override
+    public FSTransactionInfo openTxn(String txnName) throws SVNException {
+        // TODO: put transaction first
+        return transactions.get(getUUID() + ":" + txnName); // FIXME
+    }
+
+    public void storeActivity(FSTransactionInfo txnInfo) throws SVNException {
+        transactions.put(getUUID() + ":" + txnInfo.getTxnId(), txnInfo);
+    }
+
+    @Override
+    public FSTransactionRoot createTransactionRoot(FSTransactionInfo txn) throws SVNException {
+        SVNProperties txnProps = getTransactionProperties(txn.getTxnId());
+        int flags = 0;
+        if (txnProps.getStringValue(SVNProperty.TXN_CHECK_OUT_OF_DATENESS) != null) {
+            flags |= FSTransactionRoot.SVN_FS_TXN_CHECK_OUT_OF_DATENESS;
+        }
+        if (txnProps.getStringValue(SVNProperty.TXN_CHECK_LOCKS) != null) {
+            flags |= FSTransactionRoot.SVN_FS_TXN_CHECK_LOCKS;
+        }
+
+        // FIXME
+        return new FSTransactionRoot(this, txn.getTxnId(), txn.getBaseRevision(), flags) {
+            public FSTransactionInfo getTxn() throws SVNException {
+                return transactions.get(getUUID() + ":" + getTxnID());
+            }
+        };
     }
 }

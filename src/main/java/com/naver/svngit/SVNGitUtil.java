@@ -48,4 +48,11 @@ public class SVNGitUtil {
         }
         return new RevWalk(myGitRepository).parseCommit(commitId);
     }
+
+    public static long getRevisionFromCommitId(Repository repo, ObjectId lastModified) throws IOException {
+        String name = lastModified.getName();
+        Ref ref = repo.getRef("refs/svn/id/" + name);
+        Ref target = ref.getTarget();
+        return getRevisionFromRefName(target.getName());
+    }
 }

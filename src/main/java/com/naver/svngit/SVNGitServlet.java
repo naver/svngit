@@ -8,10 +8,8 @@ package com.naver.svngit;
 import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.internal.io.dav.DAVElement;
-import org.tmatesoft.svn.core.internal.server.dav.DAVException;
-import org.tmatesoft.svn.core.internal.server.dav.DAVRepositoryManager;
-import org.tmatesoft.svn.core.internal.server.dav.DAVServlet;
-import org.tmatesoft.svn.core.internal.server.dav.DAVXMLUtil;
+import org.tmatesoft.svn.core.internal.server.dav.*;
+import org.tmatesoft.svn.core.internal.server.dav.handlers.SVNGitDAVHandlerFactory;
 import org.tmatesoft.svn.core.internal.server.dav.handlers.ServletDAVHandler;
 import org.tmatesoft.svn.core.internal.util.SVNEncodingUtil;
 import org.tmatesoft.svn.core.internal.util.SVNXMLUtil;
@@ -28,6 +26,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SVNGitServlet extends DAVServlet {
+    /*
+    private DAVConfig myDAVConfig;
+
+    @Override
+    protected DAVConfig getDAVConfig() {
+        return myDAVConfig;
+    }
+
+    @Override
+    public void init() {
+        // FSRepositoryFactory.setup();
+        try {
+            myDAVConfig = new DAVConfig(getServletConfig());
+        } catch (SVNException e) {
+            myDAVConfig = null;
+        }
+    }
+    */
+
     @Override
     public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ServletDAVHandler handler = null;

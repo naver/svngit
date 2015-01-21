@@ -67,7 +67,7 @@ public class GitFSRevisionRoot extends FSRevisionRoot {
             FSRepresentation rep = new FSRepresentation();
             rep.setRevision(getRevision());
             node.setTextRepresentation(rep);
-            FSID id = FSID.createRevId(null, null, node.getCreatedRevision(), -1); // FIXME
+            FSID id = FSID.createRevId(treeWalk.getObjectId(0).getName(), null, node.getCreatedRevision(), -1); // FIXME
             node.setId(id);
             // TODO: textRep.setMD5HexDigest();
             // TODO: node.setTextRepresentation(textRep);
