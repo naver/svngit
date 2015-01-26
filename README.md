@@ -13,6 +13,7 @@ Currently, only these SVN commands are supported:
 * checkout
 * update
 * log
+* commit
 
 ## Goal
 
