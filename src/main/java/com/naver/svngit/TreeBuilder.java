@@ -44,33 +44,21 @@ public class TreeBuilder {
 
     public TreeBuilder add(String path, ObjectId blobId) {
 		addings.put(path, blobId);
-		removings.remove(path);
-        copyings.remove(path);
-		movings.remove(path);
 		return this;
     }
 
 	public TreeBuilder remove(String path) {
-        addings.remove(path);
 		removings.add(path);
-		copyings.remove(path);
-		movings.remove(path);
 		return this;
 	}
 
 	public TreeBuilder move(String sourcePath, String destinationPath) {
-		addings.remove(sourcePath);
-		removings.remove(sourcePath);
-		copyings.remove(sourcePath);
 		movings.put(sourcePath, destinationPath);
 		return this;
 	}
 
 	public TreeBuilder copy(String sourcePath, String destinationPath) {
-		addings.remove(sourcePath);
-		removings.remove(sourcePath);
 		copyings.put(sourcePath, destinationPath);
-		movings.remove(sourcePath);
 		return this;
 	}
 
@@ -132,49 +120,60 @@ public class TreeBuilder {
 			walk.setRecursive(true);
 
 			while (walk.next()) {
-				AbstractTreeIterator cIter = walk.getTree(0,
+				final AbstractTreeIterator cIter = walk.getTree(0,
 						AbstractTreeIterator.class);
 				if (cIter == null) {
 					// Not in commit, don't add to new index
 					continue;
 				}
 
-				String path = new String(walk.getRawPath());
+				final String path = new String(walk.getRawPath());
+				final DirCacheIterator dcIter = walk.getTree(1,
+						DirCacheIterator.class);
 
-				if (removings.contains(path)) {
-					continue;
-				}
+				abstract class LazySourceEntry { abstract DirCacheEntry get(); }
+				final LazySourceEntry sourceEntry = new LazySourceEntry() {
+					private DirCacheEntry entry = null;
+					public DirCacheEntry get() {
+						if (entry != null) {
+							return entry;
+						}
+						entry = new DirCacheEntry(path);
+						entry.setFileMode(cIter.getEntryFileMode());
+						if (dcIter != null && dcIter.idEqual(cIter)) {
+							DirCacheEntry indexEntry = dcIter.getDirCacheEntry();
+							entry.setLastModified(indexEntry.getLastModified());
+							entry.setLength(indexEntry.getLength());
+						}
+						entry.setObjectIdFromRaw(cIter.idBuffer(), cIter.idOffset());
+						return entry;
+					}
+				};
 
-				if (movings.containsKey(path)) {
-					path = movings.get(path);
-				}
-
-				final DirCacheEntry entry = new DirCacheEntry(path);
-				entry.setFileMode(cIter.getEntryFileMode());
-
-				if (addings.containsKey(path)) { // FIXME: slow? nlogn?
-					entry.setObjectId(addings.get(path));
+				// Update
+				if (addings.containsKey(path)) {
+					final DirCacheEntry newEntry = new DirCacheEntry(path);
+					newEntry.copyMetaData(sourceEntry.get());
+					newEntry.setObjectId(addings.get(path));
+					builder.add(newEntry);
 					addings.remove(path);
 					updatedPaths.add(path);
-				} else {
-					entry.setObjectIdFromRaw(cIter.idBuffer(), cIter.idOffset());
 				}
 
-				DirCacheIterator dcIter = walk.getTree(1,
-						DirCacheIterator.class);
-				if (dcIter != null && dcIter.idEqual(cIter)) {
-					DirCacheEntry indexEntry = dcIter.getDirCacheEntry();
-					entry.setLastModified(indexEntry.getLastModified());
-					entry.setLength(indexEntry.getLength());
+				// Rename or copy
+				if (movings.containsKey(path) || copyings.containsKey(path)) {
+					String newPath = movings.get(path);
+					if (newPath == null) {
+						newPath = copyings.get(path);
+					}
+					final DirCacheEntry newEntry = new DirCacheEntry(newPath);
+					newEntry.copyMetaData(sourceEntry.get());
+					builder.add(newEntry);
 				}
 
-				builder.add(entry);
-
-				if (copyings.containsKey(path)) {
-					String dest = copyings.get(path);
-					final DirCacheEntry copiedEntry = new DirCacheEntry(dest);
-					copiedEntry.copyMetaData(entry);
-					builder.add(copiedEntry);
+				// Keep the source entry only if the path is neither deleted, renamed nor updated.
+				if (!removings.contains(path) && !movings.containsKey(path) && !updatedPaths.contains(path)) {
+					builder.add(sourceEntry.get());
 				}
 			}
 
