@@ -12,7 +12,6 @@ import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
 import org.tmatesoft.svn.core.auth.SVNUserNameAuthentication;
 import org.tmatesoft.svn.core.internal.delta.SVNDeltaCombiner;
-import org.tmatesoft.svn.core.internal.io.fs.*;
 import org.tmatesoft.svn.core.internal.util.SVNDate;
 import org.tmatesoft.svn.core.internal.util.SVNEncodingUtil;
 import org.tmatesoft.svn.core.internal.util.SVNPathUtil;
@@ -29,7 +28,7 @@ import java.util.*;
 
 public class SVNGitRepository extends FSRepository {
 
-    private FSUpdateContext myReporterContext; // TODO: init this
+    private SVNGitUpdateContext myReporterContext; // TODO: init this
     private File myReposRootDir; // TODO: init this
     private FSFS myGitFS; // TODO: init this
 
@@ -147,7 +146,7 @@ public class SVNGitRepository extends FSRepository {
         String fullTargetPath = switchPath != null ? switchPath : SVNPathUtil.getAbsolutePath(SVNPathUtil.append(anchor, target));
 
         if (myReporterContext == null) {
-            myReporterContext = new FSUpdateContext(this, getFSFS(), targetRevision,
+            myReporterContext = new SVNGitUpdateContext(this, getFSFS(), targetRevision,
                                                     SVNFileUtil.createTempFile("report", ".tmp"),
                                                     target, fullTargetPath,
                                                     switchURL == null ? false : true,
