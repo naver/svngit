@@ -1,4 +1,4 @@
-package com.naver.svngit;
+package com.navercorp.svngit;
 
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;

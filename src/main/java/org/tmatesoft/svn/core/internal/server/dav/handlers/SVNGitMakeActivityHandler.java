@@ -1,6 +1,6 @@
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
-import com.naver.svngit.GitFS;
+import com.navercorp.svngit.GitFS;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepository;

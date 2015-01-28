@@ -1,8 +1,8 @@
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
-import com.naver.svngit.GitFS;
-import com.naver.svngit.SVNGitUtil;
-import com.naver.svngit.TreeBuilder;
+import com.navercorp.svngit.GitFS;
+import com.navercorp.svngit.SVNGitUtil;
+import com.navercorp.svngit.TreeBuilder;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;

@@ -1,7 +1,7 @@
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
-import com.naver.svngit.GitFS;
-import com.naver.svngit.TreeBuilder;
+import com.navercorp.svngit.GitFS;
+import com.navercorp.svngit.TreeBuilder;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.*;
 import org.tmatesoft.svn.core.*;
@@ -225,7 +225,7 @@ public class SVNGitMergeHandler extends DAVMergeHandler {
 
         try {
             ((GitFS) fsfs).updateSvnRefs();
-            newRev = com.naver.svngit.SVNGitUtil.getRevisionFromCommitId(repo, newCommitId);
+            newRev = com.navercorp.svngit.SVNGitUtil.getRevisionFromCommitId(repo, newCommitId);
         } catch (Exception e) {
             throw new SVNException(SVNErrorMessage.create(SVNErrorCode.FS_GENERAL, "Failed to update refs"), e);
         }

@@ -7,7 +7,7 @@
 
     <servlet>
         <servlet-name>svngit</servlet-name>
-        <servlet-class>com.naver.svngit.SVNGitServlet</servlet-class>
+        <servlet-class>com.navercorp.svngit.SVNGitServlet</servlet-class>
         <init-param>
             <param-name>SVNParentPath</param-name>
             <param-value>/path/to/gitroot</param-value>

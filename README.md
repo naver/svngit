@@ -34,7 +34,7 @@ SVNParentPath and the url pattern as follows:
         ...
         <servlet>
             <servlet-name>svngit</servlet-name>
-            <servlet-class>com.naver.svngit.SVNGitServlet</servlet-class>
+            <servlet-class>com.navercorp.svngit.SVNGitServlet</servlet-class>
             <init-param>
                 <param-name>SVNParentPath</param-name>
                 <param-value>/path/to/gitroot</param-value>
@@ -74,7 +74,7 @@ SVNParentPath and the url pattern as follows:
 ```
 
 All the source codes in package org.tmatesoft.svn.core.internal and
-com.naver.svngit except class com.naver.svngit.SVNGitUtil, which originate from
+com.navercorp.svngit except class com.navercorp.svngit.SVNGitUtil, which originate from
 SVNKit(http://svnkit.com/index.html), are covered by The TMate License.
 
 Please check The TMate License in the NOTICE file before you use this SW.

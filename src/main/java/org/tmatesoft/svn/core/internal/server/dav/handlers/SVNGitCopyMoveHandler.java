@@ -1,6 +1,6 @@
 package org.tmatesoft.svn.core.internal.server.dav.handlers;
 
-import com.naver.svngit.TreeBuilder;
+import com.navercorp.svngit.TreeBuilder;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.internal.io.dav.http.HTTPHeader;

@@ -1,5 +1,5 @@
 All the source codes in package org.tmatesoft.svn.core.internal and
-com.naver.svngit except class com.naver.svngit.SVNGitUtil, which originate
+com.navercorp.svngit except class com.navercorp.svngit.SVNGitUtil, which originate
 from SVNKit(http://svnkit.com/index.html), are covered by The TMate License.
 
 ======================================================================

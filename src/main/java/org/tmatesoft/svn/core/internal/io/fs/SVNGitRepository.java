@@ -5,7 +5,7 @@
  */
 package org.tmatesoft.svn.core.internal.io.fs; // To call myLocationsFinder.reset()
 
-import com.naver.svngit.GitFS;
+import com.navercorp.svngit.GitFS;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;

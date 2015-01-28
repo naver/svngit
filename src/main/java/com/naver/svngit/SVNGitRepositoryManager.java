@@ -3,7 +3,7 @@
  *
  * Modified by Naver Corp. (Author: Yi EungJun <eungjun.yi@navercorp.com>)
  */
-package com.naver.svngit;
+package com.navercorp.svngit;
 
 import java.io.File;
 import java.security.Principal;
