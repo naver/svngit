@@ -21,7 +21,7 @@ We will support most of basic SVN commands as Github does.
 
 ## Build
 
-    $ mvn jar:jar
+    $ mvn package
 
 ## Demo
 
