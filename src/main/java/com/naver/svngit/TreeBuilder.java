@@ -107,6 +107,9 @@ public class TreeBuilder {
 		return new Result(updates, dc.writeTree(repo.getObjectDatabase().newInserter()));
 	}
 
+	// Imported from resetIndex method at
+	// https://github.com/eclipse/jgit/blob/v3.5.1.201410131835-r/org.eclipse.jgit/src/org/eclipse/jgit/api/ResetCommand.java
+	// and modified by Yi EungJun
 	private Set<String> readAndUpdateIndex(DirCacheBuilder builder) throws IOException {
 		TreeWalk walk = null;
 		Set<String> updatedPaths = new HashSet<>();
