@@ -15,13 +15,26 @@ Currently, only these SVN commands are supported:
 * log
 * commit
 
-## Goal
+## Our Goal
 
 We will support most of basic SVN commands as Github does.
 
-## Build
+## Bulid & Install
 
-    $ mvn package
+Just add this dependency into your pom.xml to get the library from maven
+central repository:
+
+    <dependency>
+        <groupId>com.navercorp</groupId>
+        <artifactId>svngit</artifactId>
+        <version>0.2.0</version>
+    </dependency>
+
+or build from source code and get target/svngit-VERSION.jar:
+
+    git clone https://github.com/naver/svngit
+    cd svngit
+    mvn package
 
 ## Demo
 
