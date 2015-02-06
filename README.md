@@ -92,4 +92,8 @@ SVNKit(http://svnkit.com/index.html), are covered by The TMate License.
 
 Please check The TMate License in the NOTICE file before you use this SW.
 
+## Contact
+
+Please email <a href="mailto:eungjun.yi@navercorp.com">me</a>.
+
 ## Pull requests are welcomed!
