@@ -73,7 +73,7 @@
         <plugins>
             <plugin>
                 <!-- This plugin is needed for the servlet example -->
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jettyVersion}</version>
             </plugin>
