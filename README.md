@@ -1,3 +1,10 @@
+---
+
+**This project is not actively maintained.**
+**Proceed at your own risk!**
+
+---
+
 # SVNGit
 
 A servlet implementation for SVN clients to access Git repositories
